@@ -1,0 +1,2 @@
+rootProject.name = "ai_speech_helloworld"
+include ':app'
