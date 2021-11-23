@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
     private lateinit var recognizerIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // test test test
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
