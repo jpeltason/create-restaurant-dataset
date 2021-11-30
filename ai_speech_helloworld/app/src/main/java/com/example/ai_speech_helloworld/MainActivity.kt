@@ -1,5 +1,7 @@
 package com.example.ai_speech_helloworld
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -17,7 +19,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import java.util.*
 
-class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, RecognitionListener {
+
+class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener {
 
     private val permission = 100
     private lateinit var speechRecognizer: SpeechRecognizer
@@ -27,6 +30,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
     private var editText: EditText? = null
     private var textViewRecognizedText : TextView? = null
     private lateinit var recognizerIntent: Intent
+    private var recognitionListener: RecognitionListener? = null //Must have this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,30 +52,123 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
 
         Log.e("", "isRecognitionAvailable: " +SpeechRecognizer.isRecognitionAvailable(this))
         //buttonListen!!.isEnabled = SpeechRecognizer.isRecognitionAvailable(this)
-        speechRecognizer.setRecognitionListener(this)
+        //speechRecognizer.setRecognitionListener(this)
 
-
+        var defaultLang = Locale.getDefault()
+        Log.i("", "defaultLang="+defaultLang)
 
         recognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "de_DE")
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+
+        //funktioniert
+        val languagePref = "en-US" //or, whatever iso code...
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, languagePref);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, languagePref);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, languagePref)
+
+
+        /*
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "de-DE");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "de-DE");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "de-DE")
+        val lang = arrayOf<String>("de-DE")
+        recognizerIntent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES",  lang)
+        */
+
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
 
 
-        Log.i("", "language: " + Locale.getDefault())
+        speechRecognizer.setRecognitionListener(
+            object : RecognitionListener {
+
+                var singleResult = true
+                override fun onReadyForSpeech(params: Bundle?) {
+                    Log.i("", "readyForSpeech2")
+                }
+
+                override fun onBeginningOfSpeech() {
+                    Log.i("", "onBeginningOfSpeech2")
+                }
+
+                override fun onRmsChanged(rmsdB: Float) {
+                    Log.i("", "onRmsChanged2")
+                }
+
+                override fun onBufferReceived(buffer: ByteArray?) {
+                    Log.i("", "onBufferReceived")
+                }
+
+                override fun onEndOfSpeech() {
+                    Log.i("", "onEndOfSpeech2")
+                }
+
+                override fun onError(error: Int) {
+                    var message = ""
+                    message = when (error) {
+                        SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+                        SpeechRecognizer.ERROR_CLIENT -> "Client side error"
+                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+                        SpeechRecognizer.ERROR_NETWORK -> "Network error"
+                        SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
+                        SpeechRecognizer.ERROR_NO_MATCH -> "No match"
+                        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
+                        SpeechRecognizer.ERROR_SERVER -> "error from server"
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
+                        else -> "Didn't understand, please try again."
+                    }
+
+                    Log.i("", message)
+                }
+                //private var supportedLanguages: List<String>? = null
+                override fun onResults(results: Bundle?) {
+                    if (singleResult) {
+                        Log.i("", "onResults - singleResult=true")
+                        results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).let {
+                            // do something with result
+
+                            results?.toString()?.let { it1 -> Log.i("", "result: " +it1) }
+                            //Log.i("", supportedLanguages.toString())
+
+                            /*
+                            val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            var text = ""
+                            if (matches != null) {
+                                for (result in matches) text = """
+                                        $result
+                                        """.trimIndent()
+                                        textViewRecognizedText?.text = text
+                            }*/
+
+                        }
+                        Log.i("", "onResults - singleResult=false")
+                        // next result will be ignored
+                        singleResult = false
+                    }
+                }
+
+                override fun onPartialResults(partialResults: Bundle?) {
+                    val data = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val unstableData = partialResults?.getStringArrayList("android.speech.extra.UNSTABLE_TEXT")
+                    var mResult = data!![0] + unstableData!![0]
+                    Log.i("logTag", "onPartialResults" + mResult)
+                }
+
+                override fun onEvent(eventType: Int, params: Bundle?) {
+                    Log.i("", "onEvent")
+                }
+            })
 
         requestAudioPermissions()
 
 
     }
+
     //Requesting run-time permissions
 
     //Requesting run-time permissions
     //Create placeholder for user's consent to record_audio permission.
     //This will be used in handling callback
     private val MY_PERMISSIONS_RECORD_AUDIO = 1
-
     private val MY_PERMISSIONS_INTERNET = 1
 
     private fun requestAudioPermissions() {
@@ -148,7 +245,6 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
             arrayOf(Manifest.permission.RECORD_AUDIO),
             permission)*/
         speechRecognizer.startListening(recognizerIntent)
-
     }
 
     private fun speakOut() {
@@ -185,64 +281,5 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
         }
     }
 
-    override fun onReadyForSpeech(params: Bundle?) {
-        Log.i("", "readyForSpeech")
-    }
-
-    override fun onBeginningOfSpeech() {
-        Log.e("", "onBeginningOfSpeech")
-    }
-
-    override fun onRmsChanged(rmsdB: Float) {
-        Log.i("", "rmsChanged")
-    }
-
-    override fun onBufferReceived(buffer: ByteArray?) {
-        Log.i("", "bufferReceived")
-    }
-
-    override fun onEndOfSpeech() {
-        Log.e("", "onEndOfSpeech")
-    }
-
-    override fun onError(error: Int) {
-        var message = ""
-        message = when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-            SpeechRecognizer.ERROR_CLIENT -> "Client side error"
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
-            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RecognitionService busy"
-            SpeechRecognizer.ERROR_SERVER -> "error from server"
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
-            else -> "Didn't understand, please try again."
-        }
-
-        Log.i("", message)
-        //return message
-    }
-
-    override fun onResults(results: Bundle?) {
-        Log.i("logTag", "onResults")
-        val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        var text = ""
-        if (matches != null) {
-            for (result in matches) text = """
-            $result
-            """.trimIndent()
-            textViewRecognizedText?.text = text
-        }
-        textViewRecognizedText?.text ?: text
-    }
-
-    override fun onPartialResults(partialResults: Bundle?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onEvent(eventType: Int, params: Bundle?) {
-        TODO("Not yet implemented")
-    }
 
 }
