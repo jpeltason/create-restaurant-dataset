@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener {
     private var recognitionListener: RecognitionListener? = null //Must have this
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // test test test
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
