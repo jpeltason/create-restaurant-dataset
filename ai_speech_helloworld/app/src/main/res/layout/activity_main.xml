@@ -16,7 +16,7 @@
 
         <EditText
             android:id="@+id/edittext_input"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10">
 
@@ -25,9 +25,13 @@
 
         <Button
             android:id="@+id/button_speak"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Speak" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
 
         <Button
             android:id="@+id/button_listen"
@@ -39,7 +43,13 @@
             android:id="@+id/textView_recognizedText"
             android:layout_width="match_parent"
             android:layout_height="156dp"
-            android:text="TextView" />
+            android:gravity="center"
+            android:text="Hier wird der erkannte Text stehen"
+            android:textAlignment="center" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
 
     </LinearLayout>
 </RelativeLayout>

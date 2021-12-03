@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
 
-        requestAudioPermissions()
+        setPermissions()
     }
 
     override fun onInit(status: Int) {
@@ -102,14 +102,14 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
         super.onStop()
     }
 
-    private fun requestAudioPermissions() {
+    //PERMISSION HANDLING
+    private fun setPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.RECORD_AUDIO
             )
             != PackageManager.PERMISSION_GRANTED
         ) {
-
             //When permission is not granted by user, show them message why this permission is needed.
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.RECORD_AUDIO) &&
                 ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.INTERNET)
@@ -143,10 +143,8 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
             (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED)
         )
         {
-
             Log.i("", "go ahead with recording audio")
             //Go ahead with recording audio now
-
         }
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>,
@@ -163,7 +161,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
             }
         }
     }
-
+    //----------------------------
     //SPEECH RECOGNITION CALLBACKS
     override fun onReadyForSpeech(params: Bundle?) {
         Log.i("", "readyForSpeech")
@@ -203,10 +201,9 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
 
     override fun onResults(results: Bundle?) {
         //if (singleResult) {
-            Log.i("", "onResults - singleResult=true")
+            Log.i("", "onResults")
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).let {
                 results?.toString()?.let { it1 -> Log.i("", "result: " +it1) }
-
                 val matches = results!!.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 var text = ""
                 if (matches != null) {
@@ -219,7 +216,6 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
                     textViewRecognizedText?.text = text
                 }
             }
-            Log.i("", "onResults - singleResult=false")
             // next result will be ignored
             //singleResult = false
             speechRecognizer.stopListening()
@@ -238,6 +234,7 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
         Log.i("", "onEvent")
     }
 
+    //-------------------------------------------
     override fun onDestroy() {
         if (tts != null) {
             tts!!.shutdown()
