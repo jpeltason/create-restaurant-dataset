@@ -81,9 +81,6 @@ class MainActivity : AppCompatActivity(),TextToSpeech.OnInitListener, Recognitio
         } else {
             Log.e("TTS", "Initilization Failed!")
         }
-
-
-
     }
     private fun startListening() {
         Log.e("", "startListening")

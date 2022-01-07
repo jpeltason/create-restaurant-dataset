@@ -57,3 +57,10 @@ This is done by assigning each restaurant a `tf_idf score` (based on its reviews
 
 **Input**: DataFrame with restaurants (yelp_restaurants.csv), DataFrame with user reviews (reviews.csv) \
 **Output**: DataFrame with restaurants, augmented with newly derived features as columns (restaurants_df_augmented.csv)
+
+## google account
+
+email: siiweissach@gmail.com
+password: SiiWei$$ach2021
+
+Email zur Kontowiederherstellung: d.bogen@spiegel-institut.de
